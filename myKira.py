@@ -7,9 +7,10 @@ import os
 
 
 #CREATING SYNONYMS DICTIONARY
-mk=['make','create','mk']		#DO THE INSERTIONS IN THE BEG.
-rm=['delete','remove','drop','rm']	#DO THE INSERTIONS IN THE BEG.
-dictionary=[mk,rm]
+mk=['make','create','mk']		#DO THE INSERTIONS IN THE BEG. (CREATE SYNO.)
+rm=['delete','remove','drop','rm']	#DO THE INSERTIONS IN THE BEG. (REMOVE SYNO.)
+dir_type=['directory','folder','dir']
+dictionary_op=[mk,rm]			#TO DETECT OPERATION
 
 
 #RECOGNIZER DEFINED
@@ -30,6 +31,7 @@ def ask_name():
 	except:
 		print("Sorry, could Not Understand!!")
 		pass
+
 
 
 #ASKS FOR THE LOCATION IF REQUIRED ( --RETURNS LOC. OF FILE-- )
@@ -61,9 +63,9 @@ def tolower(ip_list):
 #CREATING FOLDER ( --RETURNS OPERATION KEYWORD-- )
 def check_dict(ip):
 	for i in range(0,len(ip)):
-		for j in range(0,len(dictionary)):
-			if ip[i] in dictionary[j]:
-				return dictionary[j][-1]
+		for j in range(0,len(dictionary_op)):
+			if ip[i] in dictionary_op[j]:
+				return dictionary_op[j][-1]
 				break	
 	#return ("\nI have been designed to perform directory operations, not to handle your BULLSHIT!!!")
 
@@ -78,6 +80,11 @@ def remove_dir():
 	dir_name=ask_name()
 	os.system('rmdir '+dir_name)
 	
+#RENAMING FOLDER ( --RETURNS NOTHING-- )
+def rename_dir():
+	source_dir=ask_name()
+	new_dir=ask_name()
+	os.system('mv '+source_dir+' '+new_dir)
 
 
  	## MAIN PART ## -----------------------------------------------------------------------------------------------------------------
@@ -108,6 +115,8 @@ try:
 		create_dir()
 	elif operation=='rm':
 		remove_dir()
+	else:
+		rename_dir()
 	
 	'''
 	if 'create' in final_data:
