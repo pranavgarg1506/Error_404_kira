@@ -11,8 +11,12 @@ mk=['make','create','mk']		#DO THE INSERTIONS IN THE BEG. (CREATE SYNO.)
 rm=['delete','remove','drop','rm']	#DO THE INSERTIONS IN THE BEG. (REMOVE SYNO.)
 dictionary_op=[mk,rm]			#TO DETECT OPERATION
 
-dir_type=['directory','folder','dir']
-dictionary_type=[dir_type]
+dir_type=['directory','folder','folders','dir']
+file_type=['file','files','fi']
+dictionary_type=[dir_type,file_type]	#TO DETECT OPERATION TYPE
+
+count=['total','number','num']
+dictionary_count=[count]
 
 #RECOGNIZER DEFINED
 r=sr.Recognizer()
@@ -61,11 +65,12 @@ def tolower(ip_list):
 	return ip_list
 
 
-#CREATING FOLDER ( --RETURNS OPERATION KEYWORD-- ) 
+#DICTIONARY CHECKING FOR REQUIRED DETAILS ( --RETURNS MULTIPLE-- ) 
 
 def check_dict(ip):
 	operation='null'
 	op_type='null'
+	count_type='null'
 	#TO DETECT OPERATION TO PERFORM
 	for i in range(0,len(ip)):
 		for j in range(0,len(dictionary_op)):
@@ -80,8 +85,14 @@ def check_dict(ip):
 				op_type = dictionary_type[k][-1]
 				break
 			
-				
-	return operation ,op_type
+	#TO DETECT WEATHER TO COMPUTE TOTAL FILES OR TOTAL FOLDER PRESENT IN DIR		
+	for p in range(0,len(ip)):
+		for k in range(0,len(dictionary_count)):
+			if ip[p] in dictionary_count[k]:
+				count_type = dictionary_count[k][-1]
+				break
+
+	return operation ,op_type,count_type
 	#return ("\nI have been designed to perform directory operations, not to handle your BULLSHIT!!!")
 
 
@@ -100,6 +111,24 @@ def rename_dir():
 	source_dir=ask_name()
 	new_dir=ask_name()
 	os.system('mv '+source_dir+' '+new_dir)
+
+#COUNT DIRECTORIES AND FILES ( ** 2 functions **) ( --RETURNS NOTHING-- )
+#DIRECTORY
+def count_dir():
+	total_dirs=0
+	for root,dirs,files in os.walk('/home/priyank/Desktop/',topdown=True):
+		for all in range(0,len(dirs)):
+			total_dirs = total_dirs + len(dirs[all])
+	print('Total directories present on Desktop: ',total_dirs)
+#FILES
+def count_file():
+	total_files=0
+	for root,dirs,files in os.walk('/home/priyank/Desktop/',topdown=True):
+		for all in range(0,len(files)):
+			total_files = total_files + len(files[all])
+	print('Total files present on Desktop: ',total_files)
+
+
 
 
  	## MAIN PART ## -----------------------------------------------------------------------------------------------------------------
@@ -123,9 +152,11 @@ try:
 	data=tolower(data)
 	print(data)
 	
-	operation,op_type=check_dict(data)
+	#DICTIONARY CHECKING FOR KEYWORDS
+	operation,op_type,count_type=check_dict(data)
 	#print(operation)	
 	#print(op_type)
+	#print(count_type)
 	
 	if operation=='mk' and op_type=='dir':
 		create_dir()
@@ -133,11 +164,23 @@ try:
 		remove_dir()
 	elif ('rename' in data) and op_type=='dir':
 		rename_dir()
-	else :
-		print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
-	
-	
+	elif count_type=='num' and operation == 'null' :
+		if op_type=='dir':
+			## folder
+			count_dir()
+		elif op_type=='fi':
+			## files
+			count_file()
+		else :
+			## files+folder
+			count_dir()
+			count_file()
 
+	else :
+		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
+		print("\nSeriously, what do you think i am? A Freakin GOD.")
+		print("\nI am KIRA, get that stuck in your head.\n")
+	
 except:
 	print("Could Not Understand!!")
 	pass
