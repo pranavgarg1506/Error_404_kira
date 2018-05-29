@@ -2,5 +2,5 @@
 
 import os
 
-info = os.listdir('/home/pranav/Desktop/adhcsummer/')
+info = os.listdir('/home/priyank/Desktop/')
 print(info)

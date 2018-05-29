@@ -8,11 +8,7 @@ total_dirs = 0
 total_files = 0
 
 
-for root,dirs,files in os.walk('/',topdown=True):
-	#for i in files:
-	#	print(os.path.join(root,i))
-	#for i in dirs:
-	#	print(os.path.join(root,i))
+for root,dirs,files in os.walk('/home/priyank/Desktop/',topdown=True):
 	
 # to find all the number of directories		
 	for all in range(0,len(dirs)):

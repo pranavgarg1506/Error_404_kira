@@ -6,7 +6,7 @@ import pwd
 import grp
 
 
-file = '/home/pranav/Desktop/adhcsummer/dir_operations/proper.py'
+file = '/home/priyank/Desktop/myNapster.py'
 
 
 #____ to find the properties of the file
