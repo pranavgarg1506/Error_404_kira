@@ -4,6 +4,9 @@
 #IMPORT LIBRARIES
 import speech_recognition as sr
 import os
+import time
+import pwd
+import grp
 
 
 #CREATING SYNONYMS DICTIONARY
@@ -16,7 +19,12 @@ file_type=['file','files','fi']
 dictionary_type=[dir_type,file_type]	#TO DETECT OPERATION TYPE
 
 count=['total','number','num']
-dictionary_count=[count]
+list_file=['list','li']
+dictionary_count=[count,list_file]	#DETECT VISIBLITY TYPE i.e. count total files(count) or list total files(list_file)
+
+metadata=['property','properties','details','detail','size','permission','permissions','md'] 	#DETECT THE PROPERTIES KEYWORD
+dictionary_md=[metadata]
+
 
 #RECOGNIZER DEFINED
 r=sr.Recognizer()
@@ -71,6 +79,7 @@ def check_dict(ip):
 	operation='null'
 	op_type='null'
 	count_type='null'
+	file_details='null'
 	#TO DETECT OPERATION TO PERFORM
 	for i in range(0,len(ip)):
 		for j in range(0,len(dictionary_op)):
@@ -85,14 +94,21 @@ def check_dict(ip):
 				op_type = dictionary_type[k][-1]
 				break
 			
-	#TO DETECT WEATHER TO COMPUTE TOTAL FILES OR TOTAL FOLDER PRESENT IN DIR		
+	#DETECTING WEATHER TO PRINT LIST OF FILES OR NUMBER		
 	for p in range(0,len(ip)):
 		for k in range(0,len(dictionary_count)):
 			if ip[p] in dictionary_count[k]:
 				count_type = dictionary_count[k][-1]
 				break
 
-	return operation ,op_type,count_type
+	#DETECTING PERMISSION DETAILS ASKED		
+	for p in range(0,len(ip)):
+		for k in range(0,len(dictionary_md)):
+			if ip[p] in dictionary_md[k]:
+				file_details = dictionary_md[k][-1]
+				break
+
+	return operation ,op_type,count_type,file_details
 	#return ("\nI have been designed to perform directory operations, not to handle your BULLSHIT!!!")
 
 
@@ -112,6 +128,7 @@ def rename_dir():
 	new_dir=ask_name()
 	os.system('mv '+source_dir+' '+new_dir)
 
+
 #COUNT DIRECTORIES AND FILES ( ** 2 functions **) ( --RETURNS NOTHING-- )
 #DIRECTORY
 def count_dir():
@@ -128,6 +145,60 @@ def count_file():
 			total_files = total_files + len(files[all])
 	print('Total files present on Desktop: ',total_files)
 
+
+
+#LIST DIRECTORIES AND FILES ( --RETURNS NOTHING-- )
+def list_dir():
+	dir_names = os.listdir('/home/priyank/Desktop/')
+	for i in dir_names:
+		print(i)
+	
+
+#SHOW PROPERTIES ( --RETURNS NOTHING-- )
+def show_properties():
+	file = '/home/priyank/Desktop/myNapster.py' #REPLACE WITH DYNAMIC PATH
+	#____ to find the properties of the file
+	info = os.stat(file)
+	# to find permission in octal
+	per = str(oct(os.stat(file)[0]))[5:8]
+	#________ initalize the empty list to contain the permissions
+	per_mode=[]
+	for i in range(0,len(per)):
+		if per[i]=='0':
+			per_mode.append('---')
+		elif per[i]=='1':
+			per_mode.append('--x')
+		elif per[i]=='2':
+			per_mode.append('-w-')
+		elif per[i]=='3':
+			per_mode.append('-wx')
+		elif per[i]=='4':
+			per_mode.append('r--')
+		elif per[i]=='5':
+			per_mode.append('r-x')
+		elif per[i]=='6':
+			per_mode.append('rw-')
+		else :
+			per_mode.append('rwx')
+	# to find owner name from owner id:-
+	uid = info.st_uid   # get the owner uid number
+	userinfo = pwd.getpwuid(uid)[0]  #________ get the owner name from owner id
+	# to find group name from group id:-
+	gid = info.st_gid   # get the owner uid number
+	groupinfo = grp.getgrgid(gid)[0]  #________ get the owner name from owner id
+	
+	#printing details	
+	print('File\'s Location   :', file)
+	print('')
+	print('Group\'s name:    ',groupinfo)
+	print('User\'s name:    ',userinfo)
+	print('User\'  permission :  ',per_mode[0])
+	print('Group\' permission :  ',per_mode[1])
+	print('Other\' permission :  ',per_mode[2])
+	print('Access time       : ', time.ctime(os.path.getatime(file)))
+	print('Modified time     : ', time.ctime(os.path.getmtime(file)))
+	print('Change time       : ', time.ctime(os.path.getctime(file)))
+	print('Size         	  : ', os.path.getsize(file))
 
 
 
@@ -153,7 +224,7 @@ try:
 	print(data)
 	
 	#DICTIONARY CHECKING FOR KEYWORDS
-	operation,op_type,count_type=check_dict(data)
+	operation,op_type,count_type,file_details=check_dict(data)
 	#print(operation)	
 	#print(op_type)
 	#print(count_type)
@@ -164,7 +235,7 @@ try:
 		remove_dir()
 	elif ('rename' in data) and op_type=='dir':
 		rename_dir()
-	elif count_type=='num' and operation == 'null' :
+	elif count_type=='num' and operation == 'null':
 		if op_type=='dir':
 			## folder
 			count_dir()
@@ -175,6 +246,12 @@ try:
 			## files+folder
 			count_dir()
 			count_file()
+	elif count_type=='li' and operation == 'null':
+		#if op_type=='dir':
+			## list directories
+		list_dir()					## CHECK PRANAV ##
+	elif file_details=='md':
+		show_properties()
 
 	else :
 		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
