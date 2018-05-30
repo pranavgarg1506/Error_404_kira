@@ -29,7 +29,8 @@ dictionary_md=[metadata]
 mv=['move','transfer','mv']		#DETECT WEATHER TO MOVE OR COPY THE DIR
 cp=['copy','cp']
 hide=['hide','hd']
-dictionary_change=[mv,cp,hide]
+empty=['empty','clean','emty']
+dictionary_change=[mv,cp,hide,empty]
 
 #RECOGNIZER DEFINED
 r=sr.Recognizer()
@@ -46,6 +47,18 @@ def ask_name():
 	try:
 		name=r.recognize_google(audio)
 		return name
+	except:
+		print("Sorry, could Not Understand!!")
+		pass
+		
+def confirmation_ask():
+	with sr.Microphone() as  source:
+		r.adjust_for_ambient_noise(source)
+		print("Are you sure (yes/no)? (CAUTION : ACTION CANNOT BE UNDONE)")
+		audio=r.listen(source)
+	try:
+		confirm_choice=r.recognize_google(audio)
+		return confirm_choice
 	except:
 		print("Sorry, could Not Understand!!")
 		pass
@@ -292,6 +305,13 @@ def hide_dir():
 		
 	os.system('mv '+dir_loc+'/'+dir_name+' '+final_loc+'/.'+dir_name)
 
+def empty_folder():
+	dir_name=ask_name()
+	path=ask_path()
+	final_path=path+'/'+dir_name+"/*"
+	confirm=confirmation_ask()
+	if (confirm=="yes") or (confirm=="ya") or (confirm=="sure"):
+		os.system("rm -r "+final_path)
 
 
 
@@ -352,6 +372,8 @@ try:
 		copy_dir()
 	elif dir_op=='hd' and op_type=='dir':
 		hide_dir()
+	elif dir_op=='emty' and op_type=='dir':
+		empty_folder()
 
 	else :
 		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
