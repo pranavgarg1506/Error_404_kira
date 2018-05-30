@@ -8,16 +8,15 @@ path="/"
 final="/home/"+subprocess.getoutput("whoami")
 c=[] 
 f=0   
-d=""                                                                               
+d=""                                                                              
 with sr.Microphone() as source: 
 	r.adjust_for_ambient_noise(source) # here                                                                      
 	print("Speak:")                                                                                   
 	audio = r.listen(source)
- 
 try:
 	a=(r.recognize_google(audio))
 	#if path is at current location
-	if a==("current location" or "current path" or "present location" or "present path" or "here"):
+	if (a=="current location") or (a=="current path") or (a=="present location") or (a=="present path") or (a=="here"):
 		final=subprocess.getoutput("pwd")
 	#if path is a somewhere else in user
 	else:
