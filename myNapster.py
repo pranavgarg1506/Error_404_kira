@@ -7,6 +7,7 @@ import os
 import time
 import pwd
 import grp
+import subprocess                                                              
 
 
 #CREATING SYNONYMS DICTIONARY
@@ -49,16 +50,39 @@ def ask_name():
 
 #ASKS FOR THE LOCATION IF REQUIRED ( --RETURNS LOC. OF FILE-- )
 def ask_path():
+	path="/"
+	final="/home/"+subprocess.getoutput("whoami")
+	c=[] 
+	#f=0   
+	d=""
 	with sr.Microphone() as  source:
 		r.adjust_for_ambient_noise(source)
-		print("Can you mention the path or location ?")
+		print("Can you mention the path or location ? (HOME  is default path)")
 		audio=r.listen(source)
 	try:
 		raw_path=r.recognize_google(audio)
-		strip_data=raw_path.strip()
-		split_data=strip_data.split()
-		print(split_data)
-	
+		#strip_data=raw_path.strip()
+		#split_data=strip_data.split()
+		#print(split_data)
+		if (raw_path=="current location") or (raw_path=="current path") or (raw_path=="present location") or (raw_path=="present path"):
+			final=subprocess.getoutput("pwd")
+			#if path is a somewhere else in user
+		else:
+			split_data=raw_path.split()
+			for i in range(0,len(split_data)):
+				if split_data[i]=='desktop':
+					split_data[i]='Desktop'
+
+			if ("on" in split_data) or ("in" in split_data) or ("at" in split_data):
+				for i in range(0, len(split_data)):
+					if (split_data[i]=="on") or (split_data[i]=="in") or (split_data[i]=="at"):
+						c.insert(len(c),split_data[i+1])
+						for j in range(0, len(c)):
+							d=(path+c[j])
+							final=(final+d)
+							d=""
+							c=[]
+		return final
 		## THINK FOR THE SOLUTION ##
 
 	except:
@@ -115,91 +139,118 @@ def check_dict(ip):
 #CREATING FOLDER ( --RETURNS NOTHING-- )
 def create_dir():
 	dir_name=ask_name()
-	os.system('mkdir '+dir_name)
+	print(dir_name)
+	loc=ask_path()
+	print(loc)
+	os.system('mkdir '+loc+'/'+dir_name)
 
 #REMOVING FOLDER ( --RETURNS NOTHING-- )	## NEED TO EMPTY THE FOLDER BEFOREHAND (INTEGRATE EMPTY_DIRECTORY FUNCTION AFTER DONE)
 def remove_dir():
 	dir_name=ask_name()
-	os.system('rmdir '+dir_name)
+	print(dir_name)
+	loc=ask_path()
+	print(loc)
+	os.system('rmdir '+loc+'/'+dir_name)
 	
 #RENAMING FOLDER ( --RETURNS NOTHING-- )
 def rename_dir():
 	source_dir=ask_name()
+	print (source_dir+' will be renamed.')	
+	loc=ask_path()
+	print (loc)
+	print('Mention the new name.')
 	new_dir=ask_name()
-	os.system('mv '+source_dir+' '+new_dir)
+	os.system('mv '+loc+'/'+source_dir+' '+loc+'/'+new_dir)
 
 
 #COUNT DIRECTORIES AND FILES ( ** 2 functions **) ( --RETURNS NOTHING-- )
 #DIRECTORY
 def count_dir():
+	loc=ask_path()
 	total_dirs=0
-	for root,dirs,files in os.walk('/home/priyank/Desktop/',topdown=True):
+	for root,dirs,files in os.walk(loc+'/',topdown=True):
 		for all in range(0,len(dirs)):
 			total_dirs = total_dirs + len(dirs[all])
-	print('Total directories present on Desktop: ',total_dirs)
+	print('Total directories present on '+loc+'/ : ',total_dirs)
 #FILES
 def count_file():
 	total_files=0
-	for root,dirs,files in os.walk('/home/priyank/Desktop/',topdown=True):
+	for root,dirs,files in os.walk(loc+'/',topdown=True):
 		for all in range(0,len(files)):
 			total_files = total_files + len(files[all])
-	print('Total files present on Desktop: ',total_files)
+	print('Total files present on '+loc+'/ : ',total_files)
 
 
 
 #LIST DIRECTORIES AND FILES ( --RETURNS NOTHING-- )
 def list_dir():
-	dir_names = os.listdir('/home/priyank/Desktop/')
+	loc=ask_path()
+	dir_names = os.listdir(loc+'/')
 	for i in dir_names:
 		print(i)
 	
 
 #SHOW PROPERTIES ( --RETURNS NOTHING-- )
 def show_properties():
-	file = '/home/priyank/Desktop/myNapster.py' #REPLACE WITH DYNAMIC PATH
-	#____ to find the properties of the file
-	info = os.stat(file)
-	# to find permission in octal
-	per = str(oct(os.stat(file)[0]))[5:8]
-	#________ initalize the empty list to contain the permissions
-	per_mode=[]
-	for i in range(0,len(per)):
-		if per[i]=='0':
-			per_mode.append('---')
-		elif per[i]=='1':
-			per_mode.append('--x')
-		elif per[i]=='2':
-			per_mode.append('-w-')
-		elif per[i]=='3':
-			per_mode.append('-wx')
-		elif per[i]=='4':
-			per_mode.append('r--')
-		elif per[i]=='5':
-			per_mode.append('r-x')
-		elif per[i]=='6':
-			per_mode.append('rw-')
-		else :
-			per_mode.append('rwx')
-	# to find owner name from owner id:-
-	uid = info.st_uid   # get the owner uid number
-	userinfo = pwd.getpwuid(uid)[0]  #________ get the owner name from owner id
-	# to find group name from group id:-
-	gid = info.st_gid   # get the owner uid number
-	groupinfo = grp.getgrgid(gid)[0]  #________ get the owner name from owner id
+	#GET FILE NAME
+	with sr.Microphone() as  source:
+		r.adjust_for_ambient_noise(source)
+		print('Mention the name of file')
+		audio=r.listen(source)
+		#GET LOCATION OF FILE
+	try:
 	
-	#printing details	
-	print('File\'s Location   :', file)
-	print('')
-	print('Group\'s name:    ',groupinfo)
-	print('User\'s name:    ',userinfo)
-	print('User\'  permission :  ',per_mode[0])
-	print('Group\' permission :  ',per_mode[1])
-	print('Other\' permission :  ',per_mode[2])
-	print('Access time       : ', time.ctime(os.path.getatime(file)))
-	print('Modified time     : ', time.ctime(os.path.getmtime(file)))
-	print('Change time       : ', time.ctime(os.path.getctime(file)))
-	print('Size         	  : ', os.path.getsize(file))
+		file_name=r.recognize_google(audio)	#speech_ip --> VOICE INPUT
+		print(file_name)
+		loc=ask_path()
+		file = loc+'/'+file_name #REPLACE WITH DYNAMIC PATH
+		#____ to find the properties of the file
+		info = os.stat(file)
+		# to find permission in octal
+		per = str(oct(os.stat(file)[0]))[5:8]
+		#____ initalize the empty list to contain the permissions
+		per_mode=[]
+		for i in range(0,len(per)):
+			if per[i]=='0':
+				per_mode.append('---')
+			elif per[i]=='1':
+				per_mode.append('--x')
+			elif per[i]=='2':
+				per_mode.append('-w-')
+			elif per[i]=='3':
+				per_mode.append('-wx')
+			elif per[i]=='4':
+				per_mode.append('r--')
+			elif per[i]=='5':
+				per_mode.append('r-x')
+			elif per[i]=='6':
+				per_mode.append('rw-')
+			else :
+				per_mode.append('rwx')
+		# to find owner name from owner id:-
+		uid = info.st_uid   # get the owner uid number
+		userinfo = pwd.getpwuid(uid)[0]  #________ get the owner name from owner id
+		# to find group name from group id:-
+		gid = info.st_gid   # get the owner uid number
+		groupinfo = grp.getgrgid(gid)[0]  #________ get the owner name from owner id
+	
+		#printing details	
+		print('File\'s Location   :', file)
+		print('')
+		print('Group\'s name:    ',groupinfo)
+		print('User\'s name:    ',userinfo)
+		print('User\'  permission :  ',per_mode[0])
+		print('Group\' permission :  ',per_mode[1])
+		print('Other\' permission :  ',per_mode[2])
+		print('Access time       : ', time.ctime(os.path.getatime(file)))
+		print('Modified time     : ', time.ctime(os.path.getmtime(file)))
+		print('Change time       : ', time.ctime(os.path.getctime(file)))
+		print('Size         	  : ', os.path.getsize(file))
+	except:
+		print("Could Not Understand!!")
+		pass
 
+	
 
 
  	## MAIN PART ## -----------------------------------------------------------------------------------------------------------------
@@ -225,9 +276,7 @@ try:
 	
 	#DICTIONARY CHECKING FOR KEYWORDS
 	operation,op_type,count_type,file_details=check_dict(data)
-	#print(operation)	
-	#print(op_type)
-	#print(count_type)
+
 	
 	if operation=='mk' and op_type=='dir':
 		create_dir()
@@ -248,7 +297,7 @@ try:
 			count_file()
 	elif count_type=='li' and operation == 'null':
 		#if op_type=='dir':
-			## list directories
+			## list directories and files
 		list_dir()					## CHECK PRANAV ##
 	elif file_details=='md':
 		show_properties()
