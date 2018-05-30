@@ -26,6 +26,10 @@ dictionary_count=[count,list_file]	#DETECT VISIBLITY TYPE i.e. count total files
 metadata=['property','properties','details','detail','size','permission','permissions','md'] 	#DETECT THE PROPERTIES KEYWORD
 dictionary_md=[metadata]
 
+mv=['move','transfer','mv']		#DETECT WEATHER TO MOVE OR COPY THE DIR
+cp=['copy','cp']
+hide=['hide','hd']
+dictionary_change=[mv,cp,hide]
 
 #RECOGNIZER DEFINED
 r=sr.Recognizer()
@@ -104,6 +108,7 @@ def check_dict(ip):
 	op_type='null'
 	count_type='null'
 	file_details='null'
+	dir_op='null'
 	#TO DETECT OPERATION TO PERFORM
 	for i in range(0,len(ip)):
 		for j in range(0,len(dictionary_op)):
@@ -132,7 +137,14 @@ def check_dict(ip):
 				file_details = dictionary_md[k][-1]
 				break
 
-	return operation ,op_type,count_type,file_details
+	#DETECTING WEATHER TO MOVE OR COPY A DIR		
+	for p in range(0,len(ip)):
+		for k in range(0,len(dictionary_change)):
+			if ip[p] in dictionary_change[k]:
+				dir_op = dictionary_change[k][-1]
+				break
+
+	return operation ,op_type,count_type,file_details,dir_op
 	#return ("\nI have been designed to perform directory operations, not to handle your BULLSHIT!!!")
 
 
@@ -250,6 +262,39 @@ def show_properties():
 		print("Could Not Understand!!")
 		pass
 
+
+#MOVE, COPY AND HIDE DIRECTORIES ( ** 3 functions **) ( --RETURNS NOTHING-- )
+#MOVE
+def move_dir():
+	dir_name=ask_name()
+	print(dir_name)
+	dir_loc=ask_path()
+	print('Can you tell me the location where do you want to move it?')
+	final_loc=ask_path()
+	
+	os.system('mv '+dir_loc+'/'+dir_name+' '+final_loc+'/'+dir_name)
+
+#COPY
+def copy_dir():
+	dir_name=ask_name()
+	print(dir_name)
+	dir_loc=ask_path()
+	print('Can you tell me the location where do you want to copy it?')
+	final_loc=ask_path()
+	
+	os.system('cp '+dir_loc+'/'+dir_name+' '+final_loc+'/'+dir_name)
+
+#HIDE
+def hide_dir():
+	dir_name=ask_name()
+	print(dir_name)
+	dir_loc=ask_path()
+		
+	os.system('mv '+dir_loc+'/'+dir_name+' '+final_loc+'/.'+dir_name)
+
+
+
+
 	
 
 
@@ -275,7 +320,7 @@ try:
 	print(data)
 	
 	#DICTIONARY CHECKING FOR KEYWORDS
-	operation,op_type,count_type,file_details=check_dict(data)
+	operation,op_type,count_type,file_details,dir_op=check_dict(data)
 
 	
 	if operation=='mk' and op_type=='dir':
@@ -301,6 +346,12 @@ try:
 		list_dir()					## CHECK PRANAV ##
 	elif file_details=='md':
 		show_properties()
+	elif dir_op=='mv' and op_type=='dir':
+		move_dir()
+	elif dir_op=='cp' and op_type=='dir':
+		copy_dir()
+	elif dir_op=='hd' and op_type=='dir':
+		hide_dir()
 
 	else :
 		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
