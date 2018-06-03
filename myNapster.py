@@ -15,7 +15,7 @@ mk=['make','create','mk']		#DO THE INSERTIONS IN THE BEG. (CREATE SYNO.)
 rm=['delete','remove','drop','rm']	#DO THE INSERTIONS IN THE BEG. (REMOVE SYNO.)
 dictionary_op=[mk,rm]			#TO DETECT OPERATION
 
-dir_type=['directory','folder','folders','dir']
+dir_type=['directory','folder','folders','directories','dir']
 file_type=['file','files','fi']
 dictionary_type=[dir_type,file_type]	#TO DETECT OPERATION TYPE
 
@@ -38,7 +38,29 @@ r=sr.Recognizer()
 
 	## CREATING FUNCTIONS ## ------------------------------------------------------------------------------------------------
 
-#ASKS FOR THE FILE/FOLDER NAME IF REQUIRED ( --RETURNS NAME OF FILE-- )
+'''
+#ASKS FOR THE FILE {SPECIFIED} NAME IF REQUIRED ( --RETURNS NAME OF FILE-- )		
+def ask_name_file():
+	with sr.Microphone() as  source:
+		r.adjust_for_ambient_noise(source)
+		print("Can you mention the name?")
+		audio=r.listen(source)
+	try:
+		name=r.recognize_google(audio)
+		split_data=name.split()
+		for i in range(0,len(split_data)):
+			if split_data[i]=='dot':
+				split_data[i]=='.'
+		n_name=''
+		for i in split_data:
+			n_name=n_name+i
+		return n_name
+	except:
+		print("Sorry, could Not Understand!!")
+		pass
+
+'''
+#ASKS FOR THE FILE/FOLDER NAME IF REQUIRED ( --RETURNS NAME OF FILE-- )		
 def ask_name():
 	with sr.Microphone() as  source:
 		r.adjust_for_ambient_noise(source)
@@ -51,6 +73,8 @@ def ask_name():
 		print("Sorry, could Not Understand!!")
 		pass
 		
+
+
 def confirmation_ask():
 	with sr.Microphone() as  source:
 		r.adjust_for_ambient_noise(source)
@@ -89,6 +113,7 @@ def ask_path():
 			for i in range(0,len(split_data)):
 				if split_data[i]=='desktop':
 					split_data[i]='Desktop'
+				
 
 			if ("on" in split_data) or ("in" in split_data) or ("at" in split_data):
 				for i in range(0, len(split_data)):
@@ -175,7 +200,9 @@ def remove_dir():
 	print(dir_name)
 	loc=ask_path()
 	print(loc)
-	os.system('rmdir '+loc+'/'+dir_name)
+	confirm=confirmation_ask()
+	if (confirm=="yes") or (confirm=="ya") or (confirm=="sure"):
+		os.system('rmdir '+loc+'/'+dir_name)
 	
 #RENAMING FOLDER ( --RETURNS NOTHING-- )
 def rename_dir():
@@ -190,6 +217,7 @@ def rename_dir():
 
 #COUNT DIRECTORIES AND FILES ( ** 2 functions **) ( --RETURNS NOTHING-- )
 #DIRECTORY
+'''
 def count_dir():
 	loc=ask_path()
 	total_dirs=0
@@ -197,13 +225,26 @@ def count_dir():
 		for all in range(0,len(dirs)):
 			total_dirs = total_dirs + len(dirs[all])
 	print('Total directories present on '+loc+'/ : ',total_dirs)
+'''
+def count_dir():
+	count=0
+	a=ask_path()
+	os.system("ls -l "+a+" | grep -c ^d")
+
 #FILES
+'''
 def count_file():
+	loc=ask_path()
 	total_files=0
 	for root,dirs,files in os.walk(loc+'/',topdown=True):
 		for all in range(0,len(files)):
 			total_files = total_files + len(files[all])
 	print('Total files present on '+loc+'/ : ',total_files)
+'''
+def count_file():
+	count=0
+	a=ask_path()
+	os.system("ls -l "+a+" | egrep -c '^-'")
 
 
 
@@ -224,11 +265,20 @@ def show_properties():
 		audio=r.listen(source)
 		#GET LOCATION OF FILE
 	try:
-	
-		file_name=r.recognize_google(audio)	#speech_ip --> VOICE INPUT
-		print(file_name)
+		##
+		#file_name=r.recognize_google(audio)	#speech_ip --> VOICE INPUT
+		file_name=r.recognize_google(audio)
+		split_data=file_name.split()
+		for i in range(0,len(split_data)):
+			if split_data[i]=='dot':
+				split_data[i]=='.'
+		n_name=''
+		for i in split_data:
+			n_name=n_name+i		
+		##
+		print(n_name)
 		loc=ask_path()
-		file = loc+'/'+file_name #REPLACE WITH DYNAMIC PATH
+		file = loc+'/'+n_name 
 		#____ to find the properties of the file
 		info = os.stat(file)
 		# to find permission in octal
@@ -305,6 +355,7 @@ def hide_dir():
 		
 	os.system('mv '+dir_loc+'/'+dir_name+' '+final_loc+'/.'+dir_name)
 
+#EMPTY
 def empty_folder():
 	dir_name=ask_name()
 	path=ask_path()
@@ -341,21 +392,21 @@ try:
 	
 	#DICTIONARY CHECKING FOR KEYWORDS
 	operation,op_type,count_type,file_details,dir_op=check_dict(data)
-
+	print(operation,op_type,count_type,file_details,dir_op)
 	
-	if operation=='mk' and op_type=='dir':
+	if operation=='mk' and op_type=='dir':		#CREATE DIR
 		create_dir()
-	elif operation=='rm' and op_type=='dir':
+	elif operation=='rm' and op_type=='dir':	#REMOVE DIR
 		remove_dir()
-	elif ('rename' in data) and op_type=='dir':
+	elif ('rename' in data) and op_type=='dir':	#RENAME DIR
 		rename_dir()
-	elif count_type=='num' and operation == 'null':
+	elif count_type=='num' and operation == 'null':	
 		if op_type=='dir':
 			## folder
-			count_dir()
+			count_dir()			#COUNT DIR
 		elif op_type=='fi':
 			## files
-			count_file()
+			count_file()			#COUNT FILES
 		else :
 			## files+folder
 			count_dir()
@@ -363,17 +414,17 @@ try:
 	elif count_type=='li' and operation == 'null':
 		#if op_type=='dir':
 			## list directories and files
-		list_dir()					## CHECK PRANAV ##
+		list_dir()				#LIST DIR
 	elif file_details=='md':
-		show_properties()
+		show_properties()			#SHOW PROPERTIES
 	elif dir_op=='mv' and op_type=='dir':
-		move_dir()
+		move_dir()				#MOVE DIR
 	elif dir_op=='cp' and op_type=='dir':
-		copy_dir()
+		copy_dir()				#COPY DIR
 	elif dir_op=='hd' and op_type=='dir':
-		hide_dir()
+		hide_dir()				#HIDE DIR
 	elif dir_op=='emty' and op_type=='dir':
-		empty_folder()
+		empty_folder()				#EMPTY A DIR
 
 	else :
 		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
