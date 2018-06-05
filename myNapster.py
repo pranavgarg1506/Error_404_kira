@@ -353,7 +353,7 @@ def hide_dir():
 	print(dir_name)
 	dir_loc=ask_path()
 		
-	os.system('mv '+dir_loc+'/'+dir_name+' '+final_loc+'/.'+dir_name)
+	os.system('mv '+dir_loc+'/'+dir_name+' '+dir_loc+'/.'+dir_name)
 
 #EMPTY
 def empty_folder():
@@ -394,19 +394,19 @@ try:
 	operation,op_type,count_type,file_details,dir_op=check_dict(data)
 	print(operation,op_type,count_type,file_details,dir_op)
 	
-	if operation=='mk' and op_type=='dir':		#CREATE DIR
+	if operation=='mk' and op_type=='dir':		#CREATE DIR	<check>
 		create_dir()
-	elif operation=='rm' and op_type=='dir':	#REMOVE DIR
+	elif operation=='rm' and op_type=='dir':	#REMOVE DIR	<check>
 		remove_dir()
-	elif ('rename' in data) and op_type=='dir':	#RENAME DIR
+	elif ('rename' in data) and op_type=='dir':	#RENAME DIR	<check>
 		rename_dir()
 	elif count_type=='num' and operation == 'null':	
 		if op_type=='dir':
 			## folder
-			count_dir()			#COUNT DIR
+			count_dir()			#COUNT DIR	<check>
 		elif op_type=='fi':
 			## files
-			count_file()			#COUNT FILES
+			count_file()			#COUNT FILES	<check>
 		else :
 			## files+folder
 			count_dir()
@@ -414,17 +414,17 @@ try:
 	elif count_type=='li' and operation == 'null':
 		#if op_type=='dir':
 			## list directories and files
-		list_dir()				#LIST DIR
+		list_dir()				#LIST DIR	<check>
 	elif file_details=='md':
-		show_properties()			#SHOW PROPERTIES
+		show_properties()			#SHOW PROPERTIES<check>
 	elif dir_op=='mv' and op_type=='dir':
-		move_dir()				#MOVE DIR
+		move_dir()				#MOVE DIR	<check>
 	elif dir_op=='cp' and op_type=='dir':
-		copy_dir()				#COPY DIR
+		copy_dir()				#COPY DIR	<check>
 	elif dir_op=='hd' and op_type=='dir':
 		hide_dir()				#HIDE DIR
 	elif dir_op=='emty' and op_type=='dir':
-		empty_folder()				#EMPTY A DIR
+		empty_folder()				#EMPTY A DIR	<check>
 
 	else :
 		#print("I have been designed to perform directory operations, not to handle your BULLSHIT!!!")
